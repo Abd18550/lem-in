@@ -43,7 +43,10 @@ func ParseFile(file string) {
 	Err(or)
 	split := strings.Split(string(open), "\n")
 	farm.AntNum, or = strconv.Atoi(strings.TrimSpace(split[0]))
-	Err(or)
+	if farm.AntNum == 0 {
+		fmt.Println("ERROR: invalid data format")
+		os.Exit(0)
+	}
 	farm.Rooms = make(map[string]*Room)
 	for _, line := range split[1:] {
 		line = strings.TrimSpace(line)
@@ -181,6 +184,10 @@ func RemoveConflictingSubsets(result [][][]string) [][][]string {
 }
 
 func ChoiseCollectionPaths(grpPaths [][][]string) [][]string {
+	if len(grpPaths) == 0 {
+		fmt.Println("ERROR: invalid data format")
+		os.Exit(0)
+	}
 	bestPaths := grpPaths[0]
 	num := (farm.AntNum / len(bestPaths)) * countAvgNumRooms(bestPaths)
 	for _, grp := range grpPaths[1:] {
