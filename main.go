@@ -1,3 +1,6 @@
+// MESSAGE FOR ABD
+// bad examples now ready only long example left for audit
+// which is example 05 its in ant-farm-txt
 package main
 
 import (
@@ -24,7 +27,6 @@ var (
 	mwjoodEnd   bool
 	allPaths    [][]string
 )
-
 func main() {
 	if len(os.Args) != 2 {
 		fmt.Println("go run . example.txt")
@@ -43,6 +45,7 @@ func ParseFile(file string) {
 	Err(or)
 	split := strings.Split(string(open), "\n")
 	farm.AntNum, or = strconv.Atoi(strings.TrimSpace(split[0]))
+	Err(or)
 	if farm.AntNum == 0 {
 		fmt.Println("ERROR: invalid data format")
 		os.Exit(0)
