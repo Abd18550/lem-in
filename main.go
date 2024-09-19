@@ -1,6 +1,3 @@
-// MESSAGE FOR ABD
-// bad examples now ready only long example left for audit
-// which is example 05 its in ant-farm-txt
 package main
 
 import (
@@ -27,6 +24,7 @@ var (
 	mwjoodEnd   bool
 	allPaths    [][]string
 )
+
 func main() {
 	if len(os.Args) != 2 {
 		fmt.Println("go run . example.txt")
@@ -34,10 +32,13 @@ func main() {
 	}
 	ParseFile(os.Args[1])
 	Duffs(farm.Start.Name, farm.End.Name, []string{}, &allPaths)
+	if len(allPaths) == 0 {
+		fmt.Println("ERROR: invalid data format")
+		os.Exit(0)
+	}
 	var result1 [][][]string
 	generateSubsets(allPaths, 0, [][]string{}, &result1)
-	collectionPaths := RemoveConflictingSubsets(result1)
-	bestPaths := ChoiseCollectionPaths(collectionPaths)
+	bestPaths := ChoiseCollectionPaths(result1)
 	MoveAnts(bestPaths, farm.AntNum)
 }
 func ParseFile(file string) {
@@ -45,11 +46,11 @@ func ParseFile(file string) {
 	Err(or)
 	split := strings.Split(string(open), "\n")
 	farm.AntNum, or = strconv.Atoi(strings.TrimSpace(split[0]))
-	Err(or)
 	if farm.AntNum == 0 {
 		fmt.Println("ERROR: invalid data format")
 		os.Exit(0)
 	}
+	Err(or)
 	farm.Rooms = make(map[string]*Room)
 	for _, line := range split[1:] {
 		line = strings.TrimSpace(line)
@@ -130,7 +131,7 @@ func Duffs(start, end string, path []string, allPaths *[][]string) {
 func generateSubsets(paths [][]string, index int, currentSubset [][]string, result *[][][]string) {
 	if index == len(paths) {
 		// If the current subset is non-empty, add it to the result
-		if len(currentSubset) > 0 {
+		if len(currentSubset) > 0 && len(currentSubset) <= farm.AntNum {
 			// Make a deep copy of currentSubset and add it to the result
 			subsetCopy := make([][]string, len(currentSubset))
 			for i := range currentSubset {
@@ -147,7 +148,9 @@ func generateSubsets(paths [][]string, index int, currentSubset [][]string, resu
 
 	// Option 2: Include the current path and move to the next
 	newSubset := append(currentSubset, paths[index])
-	generateSubsets(paths, index+1, newSubset, result)
+	if !Conflicts(newSubset) {
+		generateSubsets(paths, index+1, newSubset, result)
+	}
 }
 
 // Check if there are conflicts between any two paths in the subset
@@ -175,22 +178,7 @@ func Resolve(path1, path2 []string) bool {
 	return false
 }
 
-// Remove conflicting subsets from the result
-func RemoveConflictingSubsets(result [][][]string) [][][]string {
-	var filteredResult [][][]string
-	for _, subset := range result {
-		if !Conflicts(subset) {
-			filteredResult = append(filteredResult, subset)
-		}
-	}
-	return filteredResult
-}
-
 func ChoiseCollectionPaths(grpPaths [][][]string) [][]string {
-	if len(grpPaths) == 0 {
-		fmt.Println("ERROR: invalid data format")
-		os.Exit(0)
-	}
 	bestPaths := grpPaths[0]
 	num := (farm.AntNum / len(bestPaths)) * countAvgNumRooms(bestPaths)
 	for _, grp := range grpPaths[1:] {
